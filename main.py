@@ -6,23 +6,11 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils import data
 from torch.utils.data import DataLoader
+from mpl_toolkits import mplot3d
+from vedo import Text2D, Volume, show
 
 from minisurf.trig import Gyroid
 from model.deepsdfmodel import DeepSDFModel1
-
-# gyroid = Gyroid()
-
-# data   = []
-# target = []
-# for  ax, bx, cx in product(np.array([1,1.5,2,]), repeat=3):
-#     for x, y, z in product(np.linspace(0.0, 1, 15), repeat=3):
-#         # print( ax, bx, cx)
-#         data = data + [[x,y,z, ax,bx,cx]]
-#         target = target + [gyroid(x,y,z, ax,bx,cx)]
-
-# features = torch.tensor(data)
-# labels = torch.tensor(target)
-# from dataset.tig_based_dataset import GyroidSDFDataSet
 
 
 inital_code_lgn = 3  # from ax, by and cz
@@ -159,68 +147,25 @@ import joblib
 joblib.dump(features_scaler, 'model/features_scaler.save') 
 
 
-import numpy as np
-from vedo import Text2D, Volume, show
 
 
-def visulaize_volume(ax=1, bx=1, cx=1, code=[1,1,1], step_size = 15):
 
-    
-    sc = np.empty((step_size, step_size, step_size))
-    for idx, x in enumerate(np.linspace(0.0, 1, step_size)):
-        for idy, y in enumerate(np.linspace(0.0, 1, step_size)):
-            for idz, z in enumerate(np.linspace(0.0, 1, step_size)):
-                # inp = (torch.tensor([x,y,z,  ax,bx,cx, code[0], code[1], code[2]]) - meaan)/sttd
-                inp = features_scaler.transform([[x,y,z,  ax,bx,cx, code[0], code[1], code[2]]])
-                inp = torch.tensor(inp)
-                sc[idx, idy, idz]=model(inp)
-                # if  >= 0:
-                # sc[idx, idy, idz]=0.75
-                # else:
-                    # sc[idx, idy, idz]=0.5    
-   
-    vol = Volume(sc)
-    # print(vol.tonumpy)
-    vol.add_scalarbar3d()
-    # print('numpy array from Volume:', vol.tonumpy().shape)
 
-    lego = vol.legosurface(vmin=0, vmax=3) # volume of sdf( g(x,y,z) ) > 0
-    lego.cmap('hot_r', vmin=0, vmax=3).add_scalarbar3d()
-
-    text1 = Text2D('')
-    text2 = Text2D('lego isosurface representation', c='dr')
-
-    show([ (lego,text2), (lego,text2)], N=2, azimuth=10)
-
-print("Let's show")
-from mpl_toolkits import mplot3d
-from vedo import Text2D, Volume, show
 
 model.eval() # deactivates dropout layer
-print(model(torch.tensor([0.5,0.5,0.5,  1.5,1.5,1.5,  1,1,1])))
-print(model(torch.tensor([0.5,0.5,0.5,  1.5,1.5,1.5,  1,1,1])))
+# uncomment if you still doubt the dropout to check if it truly is deterministic.
+# print(model(torch.tensor([0.5,0.5,0.5,  1.5,1.5,1.5,  1,1,1])))
+# print(model(torch.tensor([0.5,0.5,0.5,  1.5,1.5,1.5,  1,1,1])))
 
+# some random codes to test the training model. Some of these codes are meant to be
 codes = [
-        
-       
         [0.8,0.8,0.8],
         [0.9,0.9,0.9],
         [1.0,1.0,1.0],
-        [1.2,1.2,1.2],
-        [1.4,1.4,1.4],
-        [1.6,1.6,1.6],
-        [1.8,1.8,1.8],
-        [2,2,2],
-        [2.1,2.1,2.1],
-        [2.2,2.2,2.2]  
         ]
-# visulaize_volume(ax=1, bx=1, cx=1, step_size=20) 
-# visulaize_volume(ax=1, bx=1, cx=1, code=[1.5, 1.5, 1.5], step_size=20) 
-# visulaize_volume(ax=1.5, bx=1, cx=1, code=[1.5, 1.5, 1.5], step_size=20) 
-# visulaize_volume(ax=1, bx=1.5, cx=1, code=[1.5, 1.5, 1.5], step_size=20) 
-# visulaize_volume(ax=0.75, bx=0.75, cx=0.5, code=[1, 1, 1], step_size=20)
-from plotian import  plotting
 
+from plotian import  plotting
+print("Let's show")
 plotting(model=model, codes=codes)
 
 
