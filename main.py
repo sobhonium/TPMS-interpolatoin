@@ -23,9 +23,15 @@ inital_code_lgn = 3  # from ax, by and cz
 added_code_lgn = 3   # from gyroid, primitive, ... class 
 code_len = added_code_lgn + inital_code_lgn
 
+# each sample has x,y,z (3 for occupancy), ax, by, cz (3 for coefficients) and code 
+# may be like (1,0, 0), (0,1,0) or (0,0,1) i.e. 3 for code ---> samples' len is 9. 
+# So a sample from gyroid family is like:
+# [0.5,0.5,0.5,  1,1,1,  1,0,0], or
+# [0.1,0.2,0.6,  1,2,1,  1,0,0], or
+# [0.5,0.5,0.5,  2,2,1,  1,0,0], or
+# [0.2,0.1,0.1, .5,.5,1, 1,0,0] .
 
-
-# gyroid-like
+# gyroid-like ---> they have a code of shape (1,0,0)
 coef=list(product(np.linspace(1,2, 3), repeat=3))
 features1, labels1 = load_gyroid_sdf_dataset(coef=coef, axis_chuncks=20)
 # the length of features is already==3+3
@@ -33,19 +39,19 @@ features1 = torch.column_stack(
                     (features1, torch.zeros((features1.shape[0], added_code_lgn))) 
                     ) 
 features1[:,6] = 1
-# primitive-like ---> it has 2*
+# primitive-like samples ---> they have a code of shape (0,1,0)
 coef=list(product(np.linspace(1,2, 3), repeat=3))
 features2, labels2 = load_primitive_sdf_dataset(coef=coef, axis_chuncks=20)
 features2 = torch.column_stack(
-                    (features2, 2*torch.zeros((features2.shape[0], added_code_lgn)))
+                    (features2, torch.zeros((features2.shape[0], added_code_lgn)))
                     ) 
 features2[:,7] = 1
 
-# FisherS-like ---> it has 2*
+# FisherS-like sampels ---> they have a code of shape (0,0,1)
 coef=list(product(np.linspace(1,2, 3), repeat=3))
 features3, labels3 = load_fisher_s_sdf_dataset(coef=coef, axis_chuncks=20)
 features3 = torch.column_stack(
-                    (features3, 3*torch.zeros((features3.shape[0], added_code_lgn)))
+                    (features3, torch.zeros((features3.shape[0], added_code_lgn)))
                     ) 
 features3[:,8] = 1
 
