@@ -5,7 +5,7 @@ import torch
 
 from minisurf.trig import Gyroid, Primitive, FisherS
 
-
+# TODO(Self): docstrings should be completed.
 
 
 def __make_data_set(trig_name_function=Gyroid(),
@@ -35,7 +35,12 @@ def __make_data_set_helper(trig_name_function=Gyroid(),
                     axis_chuncks=15,
                     return_type = torch.tensor,
                     ):
-    # gyroid = Gyroid()
+    '''Just a helper function to understand what dataset should do.
+        Compare to load_[*]_sdf_dataset functions this one is easier to understand
+        but this one is not used for dateset creation, as it is so slow. 
+        returns features and labels of sdf fucntions for TPMS funciton inlcuding
+        gyroid, primivtive, etc. 
+    '''
     features   = []
     labels = []
     for  ax, by, cz in coef:
@@ -108,30 +113,3 @@ def load_fisher_s_sdf_dataset(coef=[(1,1,1)],
                     return_type = return_type)      
 
 
-### just in case a class form is of use.
-# class GyroidSDFDataSet:
-#     def __init__(self):
-#         self.gyroid = Gyroid()
-#     def __call__(self, coef=product(np.array([1,2,]), repeat=3), axis_chuncks=15):
-        
-#         if isinstance(coef, itertools.product):
-#             # assert(len(list(coef)[0])%3,0)
-#             pass
-
-#         elif coef.size != 3:
-#             raise ValueError("Size of coef array should be 3.")
-#         data   = []
-#         target = []
-#         for  ax, bx, cx in coef:
-#             for x, y, z in product(np.linspace(0.0, 1, axis_chuncks), repeat=3):
-#                 data = data + [[x,y,z, ax,bx,cx]]
-#                 target = target + [self.gyroid(x,y,z, ax,bx,cx)]
-
-#         self.features = torch.tensor(data)
-#         self.labels = torch.tensor(target)
-#         return self.features, self.labels
-
-
-# class DiamondSDFDataSet:
-#     def __init__(self):
-#         pass    
