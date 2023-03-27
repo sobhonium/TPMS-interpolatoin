@@ -39,6 +39,8 @@ features1 = torch.column_stack(
                     (features1, torch.zeros((features1.shape[0], added_code_lgn))) 
                     ) 
 features1[:,6] = 1
+
+
 # primitive-like samples ---> they have a code of shape (0,1,0)
 coef=list(product(np.linspace(1,2, 3), repeat=3))
 features2, labels2 = load_primitive_sdf_dataset(coef=coef, axis_chuncks=20)
@@ -46,6 +48,7 @@ features2 = torch.column_stack(
                     (features2, torch.zeros((features2.shape[0], added_code_lgn)))
                     ) 
 features2[:,7] = 1
+
 
 # FisherS-like sampels ---> they have a code of shape (0,0,1)
 coef=list(product(np.linspace(1,2, 3), repeat=3))
@@ -55,7 +58,7 @@ features3 = torch.column_stack(
                     ) 
 features3[:,8] = 1
 
-
+# concatenation of all samples 
 features = torch.cat((features1, features2))
 labels = torch.cat((labels1, labels2))
 
@@ -76,11 +79,14 @@ labels_scaler = Pipeline([('scale',StandardScaler()),
 features = features_scaler.fit_transform(features)
 features = torch.tensor(features)
 
+# the scaler act like this (it's a normal tranformer): 
 # meaan = torch.mean(features, axis=0)
 # sttd = torch.std(features, axis=0)
 # features = (features - meaan)/sttd
 
 labels = labels/torch.max(labels)
+# comments: this scaler should also be saved for test/prediction samples.
+# so, we save this down bellow, and load it for scaling the test samples. 
 #========================================================
 
 
