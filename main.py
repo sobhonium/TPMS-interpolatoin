@@ -1,25 +1,29 @@
 from itertools import product
 
+import joblib
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import QuantileTransformer, StandardScaler
 from torch.utils import data
 from torch.utils.data import DataLoader
-from mpl_toolkits import mplot3d
 from vedo import Text2D, Volume, show
 
-from minisurf.trig import Gyroid
+from dataset.tig_based_dataset import (load_fisher_s_sdf_dataset,
+                                       load_gyroid_sdf_dataset,
+                                       load_primitive_sdf_dataset)
 from model.deepsdfmodel import DeepSDFModel1
 
+#========================================================
+# features and labels and codes lengths (dataset creation)
 
 inital_code_lgn = 3  # from ax, by and cz
 added_code_lgn = 3   # from gyroid, primitive, ... class 
 code_len = added_code_lgn + inital_code_lgn
 
 
-from dataset.tig_based_dataset import (load_gyroid_sdf_dataset,
-                                       load_primitive_sdf_dataset,load_fisher_s_sdf_dataset)
 
 # gyroid-like
 coef=list(product(np.linspace(1,2, 3), repeat=3))
@@ -51,13 +55,10 @@ labels = torch.cat((labels1, labels2))
 
 features = torch.cat((features, features3))
 labels = torch.cat  ((labels, labels3))
-# print(features1.shape, features2.shape, features.shape)
+#========================================================
 
-
-
-# print(features.shape, labels.shape)
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler,QuantileTransformer
+#========================================================
+# scaling data features and labels
 features_scaler = Pipeline([('scale',StandardScaler()),
                 #  ('normalizing', QuantileTransformer(output_distribution='normal')),
                 ])
@@ -74,14 +75,12 @@ features = torch.tensor(features)
 # features = (features - meaan)/sttd
 
 labels = labels/torch.max(labels)
+#========================================================
 
-print('*'*100)
-for i in np.arange(50,150):
-    # print(f'{features[i].detach().numpy():.2f}', labels[i].detach().numpy() )
-    print(f"{np.array2string(features[i].detach().numpy(), precision=2, floatmode='fixed')}")
-    print(f"{np.array2string(labels[i].detach().numpy(), precision=2, floatmode='fixed')}")
-print('*'*100)
 
+
+#========================================================
+# splitting the dataset for train and test
 def load_array(data_arrays, batch_size, is_train=True): #@save
     """Construct a PyTorch data iterator."""
     dataset = data.TensorDataset(*data_arrays)
@@ -99,10 +98,11 @@ print(f'x train size= {train_x.shape}, test size= {test_x.shape}, batch size= {b
 print(f'y train size= {train_y.shape}, test size= {test_y.shape}, batch size= {batch_size}')
 train_loader = load_array((train_x, train_y), batch_size)
 test_loader  = load_array((test_x, test_y), batch_size)
+#========================================================
 
 
-
-
+#========================================================
+# instantiating a model
 cordinate_dim = 3  # x, y, z poisitons of one pixel
 hidden_dim = 40 # this one is so decisive
     
@@ -110,19 +110,20 @@ model = DeepSDFModel1(cordinate_dim=3,
               code_len=code_len, 
               hidden_dim=40,
               )
+#========================================================
 
-
-
-
-# hyperparameters
+#========================================================
+# hyperparameters setting
 lr = 2e-2
 epochs = 30
 DEVICE = 'cpu'
 print_step = 50
+#========================================================
 
+#========================================================
+# training
 optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 loss = nn.MSELoss()
-# print('=======>model: ', model(torch.tensor([[1,1,1, 1,1,1, 1,1,1]])), )
 print("Start training ...")
 model.train()
 
@@ -140,22 +141,29 @@ for epoch in range(epochs):
     print(overall_loss)
     
 print("Training Finished!!")
+#========================================================
+
+#========================================================
+# Saving model and its parameters.
 torch.save(model.state_dict(), "model/model.params")
 torch.save(model.state_dict(), "model/model.params.pt")
 torch.save(model, "model/enitre_model")
-import joblib
+
 joblib.dump(features_scaler, 'model/features_scaler.save') 
+#========================================================
 
 
 
 
 
-
-
+#========================================================
+# plot to see the accuracy
 model.eval() # deactivates dropout layer
 # uncomment if you still doubt the dropout to check if it truly is deterministic.
 # print(model(torch.tensor([0.5,0.5,0.5,  1.5,1.5,1.5,  1,1,1])))
 # print(model(torch.tensor([0.5,0.5,0.5,  1.5,1.5,1.5,  1,1,1])))
+
+
 
 # some random codes to test the training model. Some of these codes are meant to be
 codes = [
@@ -164,8 +172,8 @@ codes = [
         [1.0,1.0,1.0],
         ]
 
-from plotian import  plotting
+from plotian import plotting
+
 print("Let's show")
 plotting(model=model, codes=codes)
-
-
+#========================================================
