@@ -12,5 +12,7 @@ The trained model finds the results like bellow:
 
 Code (1,0,0), (0,1,0) and (0,0,1) are Gyroid, primitive and Fisher respectively.  
 There are some limitations in terms of this interpolation.
-- The volumes should be continous,
-- The volumes should be symetrical in all axes.
+- The volumes should be continous (see image bellow),
+- The volumes should be symetrical in all axes (see image bellow).
+
+![image](/results/results-plot2.png)
