@@ -16,3 +16,19 @@ There are some limitations in terms of this interpolation.
 - The volumes should be symetrical in all axes (see image bellow).
 
 ![image](/results/results-plot2.png)
+
+
+
+## Acknowledgments
+
+We would like to thank ...
+
+## Coding style
+
+*   tab for indentation
+*   80 character line length
+*   PEP8 formatting
+
+## Disclaimer
+
+This is not an officially supported ....
